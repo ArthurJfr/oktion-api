@@ -2,9 +2,10 @@ import { Injectable, NotFoundException, ConflictException  } from '@nestjs/commo
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
-import { UpdateUserDto } from './update-user.dto';
-import { CreateUserDto } from './create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { ChangePasswordDto } from './dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -30,6 +31,23 @@ export class UsersService {
     });
     return this.usersRepository.save(user);
   }
+
+
+  async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<User> {
+    const user = await this.usersRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const isMatch = await bcrypt.compare(changePasswordDto.currentPassword, user.password);
+    if (!isMatch) {
+      throw new ConflictException('Current password is incorrect');
+    }
+
+    user.password = await bcrypt.hash(changePasswordDto.newPassword, 10);
+    return this.usersRepository.save(user);
+  }
+
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     await this.usersRepository.update(id, updateUserDto);
