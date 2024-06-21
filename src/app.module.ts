@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { databaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { FriendRequestsModule } from './friend-requests/friend-requests.module';
 import * as mongoose from 'mongoose';
 
 @Module({
@@ -29,6 +30,7 @@ import * as mongoose from 'mongoose';
     }),
     UsersModule,
     AuthModule,
+    FriendRequestsModule,
    
   ],
   controllers: [],
