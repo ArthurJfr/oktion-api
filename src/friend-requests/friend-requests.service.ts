@@ -16,7 +16,7 @@ export class FriendRequestsService {
   ) {}
 
   async sendRequest(senderId: number, createFriendRequestDto: CreateFriendRequestDto): Promise<FriendRequest> {
-    const sender = await this.userRepository.findOne(senderId);
+    const sender = await this.userRepository.findOne({ where: { id: senderId } });
     if (!sender) {
       throw new NotFoundException('Sender not found');
     }
@@ -35,7 +35,7 @@ export class FriendRequestsService {
   }
 
   async respondToRequest(id: number, updateFriendRequestDto: UpdateFriendRequestDto): Promise<FriendRequest> {
-    const friendRequest = await this.friendRequestRepository.findOne(id, { relations: ['sender', 'receiver'] });
+    const friendRequest = await this.friendRequestRepository.findOne({ where: { id }, relations: ['sender', 'receiver'] });
     if (!friendRequest) {
       throw new NotFoundException('Friend request not found');
     }
@@ -44,6 +44,6 @@ export class FriendRequestsService {
   }
 
   async getPendingRequests(userId: number): Promise<FriendRequest[]> {
-    return this.friendRequestRepository.find({ where: { receiver: userId, status: 'pending' } });
+    return this.friendRequestRepository.find({ where: { receiver: { id: userId }, status: 'pending' } });
   }
 }

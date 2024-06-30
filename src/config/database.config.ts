@@ -1,5 +1,6 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { User } from '../users/user.entity';
+import { FriendRequest } from 'src/friend-requests/friend-request.entity';
 export const databaseConfig: TypeOrmModuleOptions = {
   type: 'mysql',
   host: process.env.DB_HOST || 'localhost',
@@ -7,7 +8,7 @@ export const databaseConfig: TypeOrmModuleOptions = {
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || 'root',
   database: process.env.DB_NAME || 'oktiondb',
-entities: [User],
+entities: [User, FriendRequest],
   synchronize: true, // Désactivez en production
  
 };
