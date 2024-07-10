@@ -1,5 +1,6 @@
-import { Controller, Post, Body, UnauthorizedException } from '@nestjs/common';
+import {  Controller, Post, Body, UseGuards, Request, Get, UnauthorizedException  } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -12,6 +13,12 @@ export class AuthController {
       throw new UnauthorizedException('Invalid credentials');
     }
     return this.authService.login(user);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('validate-token')
+  validateToken(@Request() req) {
+    return { valid: true };
   }
 }
 
