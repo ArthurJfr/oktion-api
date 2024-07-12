@@ -12,6 +12,10 @@ import { FriendRequestsModule } from './friend-requests/friend-requests.module';
 import * as mongoose from 'mongoose';
 import { ChatModule } from './chat/chat.module';
 
+import { FriendsModule } from './friends/friends.module';
+import { FriendsController } from './friends/friends.controller';
+import { FriendsService } from './friends/friends.service';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -32,7 +36,8 @@ import { ChatModule } from './chat/chat.module';
     UsersModule,
     AuthModule,
     FriendRequestsModule,
-    ChatModule
+    ChatModule,
+    FriendsModule
     
    
   ],

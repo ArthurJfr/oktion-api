@@ -1,6 +1,8 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from '../users/user.entity';
 
+export type FriendRequestStatus = 'pending' | 'accepted' | 'rejected';
+
 @Entity()
 export class FriendRequest {
   @PrimaryGeneratedColumn()
@@ -13,5 +15,5 @@ export class FriendRequest {
   receiver: User;
 
   @Column()
-  status: 'pending' | 'accepted' | 'rejected';
+  status: FriendRequestStatus;
 }
