@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn , CreateDateColumn,UpdateDateColumn, OneToMany  } from 'typeorm';
-import { FriendRequest } from '../friend-requests/friend-request.entity';
+import { FriendRequest } from '../friends/friend-request.entity';
 
 
 @Entity()
@@ -36,3 +36,4 @@ export class User {
   @OneToMany(() => FriendRequest, request => request.receiver)
   receivedFriendRequests: FriendRequest[];
 }
+ 

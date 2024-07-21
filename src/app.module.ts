@@ -8,13 +8,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { databaseConfig } from './config/database.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-import { FriendRequestsModule } from './friend-requests/friend-requests.module';
 import * as mongoose from 'mongoose';
 import { ChatModule } from './chat/chat.module';
 
 import { FriendsModule } from './friends/friends.module';
-import { FriendsController } from './friends/friends.controller';
-import { FriendsService } from './friends/friends.service';
+
+import { ProductsModule } from './products/products.module';
+import { AuctionsModule } from './auctions/auctions.module';
 
 @Module({
   imports: [
@@ -35,13 +35,14 @@ import { FriendsService } from './friends/friends.service';
     }),
     UsersModule,
     AuthModule,
-    FriendRequestsModule,
     ChatModule,
-    FriendsModule
+    FriendsModule,
+    ProductsModule,
+    AuctionsModule
     
    
   ],
-  controllers: [],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {

@@ -30,7 +30,7 @@ export class UsersService {
       password: hashedPassword,
     });
     return this.usersRepository.save(user);
-  }
+  } 
 
 
   async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<User> {

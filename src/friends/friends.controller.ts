@@ -1,7 +1,7 @@
-import { Controller, Get, Post, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
+import { CurrentUser } from '../auth/get-user.decorator';
+import { Controller, Get, Post, Delete, Param, Body, UseGuards, Query } from '@nestjs/common';
 import { FriendsService } from './friends.service';
 import { AuthGuard } from '@nestjs/passport';
-import { CurrentUser } from '../auth/current-user.decorator';
 import { User } from '../users/user.entity';
 
 @Controller('friends')
@@ -9,49 +9,47 @@ import { User } from '../users/user.entity';
 export class FriendsController {
   constructor(private readonly friendsService: FriendsService) {}
 
+  @Post('request')
+  async sendFriendRequest(
+    @CurrentUser() user,
+    @Body('friendUsername') friendUsername: string,
+  ) {
+    return this.friendsService.sendFriendRequest(user.userId, friendUsername);
+  }
+
   @Get()
   async getFriends(
-    @CurrentUser() user: User,
-    @Query('page') page = 1,
-    @Query('limit') limit = 20,
+    @CurrentUser() user,
   ) {
-    return this.friendsService.getFriends(user.id, Number(page), Number(limit));
+    return this.friendsService.getFriends(user.userId);
   }
 
   @Get('requests')
-  async getFriendRequests(@CurrentUser() user: User) {
-    return this.friendsService.getFriendRequests(user.id);
-  }
-
-  @Post('request')
-  async sendFriendRequest(
-    @CurrentUser() user: User,
-    @Body('friendUsername') friendUsername: string,
-  ) {
-    return this.friendsService.sendFriendRequest(user.id, friendUsername);
+  async getFriendRequests(@CurrentUser() user) {
+    return this.friendsService.getFriendRequests(user.userId);
   }
 
   @Post('accept/:requestId')
   async acceptFriendRequest(
-    @CurrentUser() user: User,
+    @CurrentUser() user,
     @Param('requestId') requestId: number,
   ) {
-    return this.friendsService.acceptFriendRequest(user.id, requestId);
+    return this.friendsService.acceptFriendRequest(user.userId, requestId);
   }
 
   @Post('decline/:requestId')
   async declineFriendRequest(
-    @CurrentUser() user: User,
+    @CurrentUser() user,
     @Param('requestId') requestId: number,
   ) {
-    return this.friendsService.declineFriendRequest(user.id, requestId);
+    return this.friendsService.declineFriendRequest(user.userId, requestId);
   }
 
   @Delete('remove/:friendId')
   async removeFriend(
-    @CurrentUser() user: User,
+    @CurrentUser() user,
     @Param('friendId') friendId: number,
   ) {
-    return this.friendsService.removeFriend(user.id, friendId);
+    return this.friendsService.removeFriend(user.userId, friendId);
   }
 }

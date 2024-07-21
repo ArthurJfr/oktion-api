@@ -58,6 +58,212 @@ $ npm run test:e2e
 $ npm run test:cov
 ```
 
+
+
+
+## Documentation de l'API NestJS
+Table des matières
+Authentification
+Login
+Valider le Token
+Utilisateurs
+Créer un utilisateur
+Mettre à jour un utilisateur
+Changer le mot de passe
+Amis
+Envoyer une demande d'ami
+Accepter une demande d'ami
+Décliner une demande d'ami
+Supprimer un ami
+Récupérer les amis
+Récupérer les demandes d'amis
+Chat
+Envoyer un message
+Récupérer les messages
+Authentification
+Login
+URL : /auth/login
+Méthode : POST
+Description : Authentifier un utilisateur.
+Corps de la requête :
+json
+Copier le code
+{
+  "email": "user@example.com",
+  "password": "password123"
+}
+Réponse :
+json
+Copier le code
+{
+  "token": "jwt-token"
+}
+Valider le Token
+URL : /auth/validate-token
+Méthode : GET
+Description : Valider le token JWT.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Réponse :
+json
+Copier le code
+{
+  "valid": true
+}
+Utilisateurs
+Créer un utilisateur
+URL : /users/create
+Méthode : POST
+Description : Créer un nouvel utilisateur.
+Corps de la requête :
+json
+Copier le code
+{
+  "username": "newuser",
+  "email": "newuser@example.com",
+  "password": "password123"
+}
+Mettre à jour un utilisateur
+URL : /users/update/:id
+Méthode : POST
+Description : Mettre à jour les informations d'un utilisateur.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Corps de la requête :
+json
+Copier le code
+{
+  "username": "updateduser",
+  "email": "updateduser@example.com"
+}
+Changer le mot de passe
+URL : /users/change-password
+Méthode : POST
+Description : Changer le mot de passe d'un utilisateur.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Corps de la requête :
+json
+Copier le code
+{
+  "currentPassword": "oldpassword123",
+  "newPassword": "newpassword123"
+}
+Amis
+Envoyer une demande d'ami
+URL : /friends/request
+Méthode : POST
+Description : Envoyer une demande d'ami à un utilisateur.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Corps de la requête :
+json
+Copier le code
+{
+  "friendUsername": "frienduser"
+}
+Accepter une demande d'ami
+URL : /friends/accept/:requestId
+Méthode : POST
+Description : Accepter une demande d'ami.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Décliner une demande d'ami
+URL : /friends/decline/:requestId
+Méthode : POST
+Description : Décliner une demande d'ami.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Supprimer un ami
+URL : /friends/remove/:friendId
+Méthode : DELETE
+Description : Supprimer un ami.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Récupérer les amis
+URL : /friends
+Méthode : GET
+Description : Récupérer la liste des amis de l'utilisateur connecté.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Paramètres de requête :
+page : Numéro de la page (par défaut: 1)
+limit : Nombre d'amis par page (par défaut: 20)
+Récupérer les demandes d'amis
+URL : /friends/requests
+Méthode : GET
+Description : Récupérer la liste des demandes d'amis reçues par l'utilisateur connecté.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Chat
+Envoyer un message
+URL : /chat/send
+Méthode : POST
+Description : Envoyer un message à un utilisateur.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Corps de la requête :
+json
+Copier le code
+{
+  "receiverId": 123,
+  "content": "Hello, how are you?"
+}
+Récupérer les messages
+URL : /chat/messages
+Méthode : GET
+Description : Récupérer les messages échangés avec un utilisateur.
+En-têtes :
+json
+Copier le code
+{
+  "Authorization": "Bearer jwt-token"
+}
+Paramètres de requête :
+friendId : ID de l'ami avec qui les messages sont échangés
+
+
+
 ## Support
 
 Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).

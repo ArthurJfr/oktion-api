@@ -14,11 +14,4 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
   
-  @UseGuards(AuthGuard('jwt'))
-  @Post('update/:id')
-  async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
-  }
-
-
 }

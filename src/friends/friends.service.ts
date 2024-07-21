@@ -1,14 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { FriendRequest, FriendRequestStatus } from '../friend-requests/friend-request.entity';
+import { FriendRequest, FriendRequestStatus } from './friend-request.entity';
 import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 
-
 @Injectable()
 export class FriendsService {
-  constructor(
+  constructor( 
     @InjectRepository(FriendRequest)
     private friendRequestRepository: Repository<FriendRequest>,
     @InjectRepository(User)
@@ -16,88 +15,103 @@ export class FriendsService {
     private usersService: UsersService,
   ) {}
 
-  async getFriends(userId: number, page: number, limit: number) {
-    const [friends, total] = await this.friendRequestRepository.findAndCount({
-      where: [
-        { sender: { id: userId }, status: 'accepted' as FriendRequestStatus },
-        { receiver: { id: userId }, status: 'accepted' as FriendRequestStatus },
-      ],
-      skip: (page - 1) * limit,
-      take: limit,
-      relations: ['sender', 'receiver'],
-    });
-
-    const friendUsers = friends.map(fr => (fr.sender.id === userId ? fr.receiver : fr.sender));
-
-    return {
-      friends: friendUsers,
-      total,
-      page,
-      totalPages: Math.ceil(total / limit),
-    };
-  }
-
-  async getFriendRequests(userId: number) {
-    return this.friendRequestRepository.find({
-      where: { receiver: { id: userId }, status: 'pending' as FriendRequestStatus },
-      relations: ['sender'],
-    });
-  }
-
-  async sendFriendRequest(userId: number, friendUsername: string) {
+  async sendFriendRequest(userId: number, friendUsername: string): Promise<FriendRequest> {
     const friend = await this.usersService.findByUsername(friendUsername);
     if (!friend) {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
+    const sender = await this.userRepository.findOne({where : {id : userId}});
+    if (!sender) {
+      throw new NotFoundException('Sender not found');
+    }
+
+    const existingRequest = await this.friendRequestRepository.findOne({
+      where: {
+        sender: sender,
+        receiver: friend,
+      },
+    });
+
+    if (existingRequest) {
+      throw new BadRequestException('Friend request already sent');
+    }
+
     const friendRequest = this.friendRequestRepository.create({
-      sender: { id: userId } as User,
-      receiver: { id: friend.id } as User,
-      status: 'pending' as FriendRequestStatus,
+      sender: sender,
+      receiver: friend,
+      status: FriendRequestStatus.PENDING,
     });
 
     return this.friendRequestRepository.save(friendRequest);
   }
 
-  async acceptFriendRequest(userId: number, requestId: number) {
-    const friendRequest = await this.friendRequestRepository.findOne({
-      where: { id: requestId },
-      relations: ['sender', 'receiver'],
+  async getFriends(userId: number) {
+    const friends = await this.friendRequestRepository.find({
+      where: [
+        { sender: { id: userId }, status: FriendRequestStatus.ACCEPTED },
+        { receiver: { id: userId }, status: FriendRequestStatus.ACCEPTED }
+      ],
+      relations: ['sender', 'receiver']
     });
 
-    if (!friendRequest || friendRequest.receiver.id !== userId) {
-      throw new Error('Invalid friend request');
+    //console.log(friends);
+      
+    const allFriends = friends.map(fr => fr.sender.id === userId ? fr.receiver : fr.sender);
+ 
+    return allFriends.map(friend => ({
+      id: friend.id,
+      username: friend.username,
+      role: friend.role, // Incluez uniquement les champs nécessaires
+    }));
+
+  }
+
+  async getFriendRequests(userId: number) {
+    return this.friendRequestRepository.find({
+      where: { receiver : { id: userId }, status: FriendRequestStatus.PENDING },
+      relations: ['sender'],
+    });
+  }
+
+  async acceptFriendRequest(userId: number, requestId: number) {
+    const friendRequest = await this.friendRequestRepository.findOne({
+      where: { id: requestId, receiver: { id: userId } },
+    });
+
+    if (!friendRequest) {
+      throw new NotFoundException('Demande d\'ami non trouvée');
     }
 
-    friendRequest.status = 'accepted';
-
+    friendRequest.status = FriendRequestStatus.ACCEPTED;
     return this.friendRequestRepository.save(friendRequest);
   }
 
   async declineFriendRequest(userId: number, requestId: number) {
     const friendRequest = await this.friendRequestRepository.findOne({
-      where: { id: requestId },
+      where: { id: requestId, receiver: { id: userId } },
     });
 
-    if (!friendRequest || friendRequest.receiver.id !== userId) {
-      throw new Error('Invalid friend request');
+    if (!friendRequest) {
+      throw new NotFoundException('Demande d\'ami non trouvée');
     }
 
-    friendRequest.status = 'rejected';
-
+    friendRequest.status = FriendRequestStatus.DECLINED;
     return this.friendRequestRepository.save(friendRequest);
   }
 
   async removeFriend(userId: number, friendId: number) {
-    const friendRequests = await this.friendRequestRepository.find({
+    const friendRequest = await this.friendRequestRepository.findOne({
       where: [
-        { sender: { id: userId }, receiver: { id: friendId }, status: 'accepted' as FriendRequestStatus },
-        { sender: { id: friendId }, receiver: { id: userId }, status: 'accepted' as FriendRequestStatus },
+        { sender: { id: userId }, receiver: { id: friendId }, status: FriendRequestStatus.ACCEPTED },
+        { sender: { id: friendId }, receiver: { id: userId }, status: FriendRequestStatus.ACCEPTED }
       ],
     });
 
-    await this.friendRequestRepository.remove(friendRequests);
+    if (!friendRequest) {
+      throw new NotFoundException('Amitié non trouvée');
+    }
 
-    return { message: 'Friend removed' };
+    return this.friendRequestRepository.remove(friendRequest);
   }
 }
